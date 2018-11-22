@@ -23,17 +23,20 @@ public class PicoController : MonoBehaviour {
     public Text candyText;
     public int candyCollected = 0;
     public Text livesText;
-    public int livesCollected = 1;
+    public int numberOfLives = 3;
     public bool fullSize = true;
+
+    public bool enemyDeathDelay = false;
 
     void Start () {
         fullSize = true;
+        enemyDeathDelay = false;
 	}
 
 	void Update () {
         
         candyText.text = candyCollected.ToString();
-        livesText.text = livesCollected.ToString();
+        livesText.text = numberOfLives.ToString();
 
         horizontalValue = Input.GetAxis("Horizontal") * Time.deltaTime * speed;
         playerTf.Translate(horizontalValue, 0, 0);
@@ -74,6 +77,12 @@ public class PicoController : MonoBehaviour {
         {
             StartCoroutine(Enlarge());
         }
+
+        if (numberOfLives == 0 && !enemyDeathDelay)
+        {
+            //Play Death mp3
+            StartCoroutine(Death());
+        }
 	}
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -94,8 +103,13 @@ public class PicoController : MonoBehaviour {
 
         if (collision.collider.tag == "Chest")
         {
-            livesCollected += 1;
+            numberOfLives += 1;
             Destroy(collision.collider.gameObject);
+        }
+
+        if (collision.collider.tag == "Enemy")
+        {
+            numberOfLives -= 1;
         }
     }
 
@@ -114,5 +128,11 @@ public class PicoController : MonoBehaviour {
         transform.localScale = new Vector3(3, 2.75f, 1);
         yield return new WaitForSecondsRealtime(0.0125f);
         fullSize = true;
+    }
+
+    IEnumerator Death()
+    {
+        yield return new WaitForSeconds(3);
+        Destroy(gameObject);
     }
 }

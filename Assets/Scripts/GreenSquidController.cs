@@ -9,6 +9,7 @@ public class GreenSquidController : MonoBehaviour {
     public RaycastHit2D squashHit;
 
     public float deathDelay;
+    public GameObject player;
 
     void Start () {
         
@@ -23,6 +24,7 @@ public class GreenSquidController : MonoBehaviour {
 
         if (squashHit.collider != null)
         {
+            player.GetComponent<PicoController>().enemyDeathDelay = true;
             Debug.Log("I've been hit!");
             StartCoroutine(Death());
         }
@@ -31,7 +33,9 @@ public class GreenSquidController : MonoBehaviour {
 
     IEnumerator Death()
     {
+        player.GetComponent<PicoController>().enemyDeathDelay = true;
         yield return new WaitForSecondsRealtime(deathDelay);
+        player.GetComponent<PicoController>().enemyDeathDelay = false;
         Destroy(gameObject);
     }
 }
