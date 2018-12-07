@@ -21,16 +21,33 @@ public class PicoController : MonoBehaviour {
     public bool isWalking;
 
     public Text candyText;
-    public int candyCollected = 0;
+    public int candyCollected;
     public Text livesText;
-    public int numberOfLives = 3;
+    public int numberOfLives;
     public bool fullSize = true;
+    public bool onTopOfEnemy = false;
+    public bool isDead;
 
-    public bool enemyDeathDelay = false;
+    public AudioSource MusicSource;
+    public AudioSource SoundEffectsSource;
+    public AudioClip jumpSound;
+    public AudioClip collectCoinSound;
+    public AudioClip collectGiftboxSound;
+    public AudioClip collectTreasureSound;
+    public AudioClip miniturizeSound;
+    public AudioClip enlargeSound;
+    public AudioClip killEnemySound;
+    public AudioClip damageSound;
+    public AudioClip deathSound;
+    public Camera mainCamera;
+    
 
     void Start () {
         fullSize = true;
-        enemyDeathDelay = false;
+        onTopOfEnemy = false;
+        candyCollected = 0;
+        numberOfLives = 3;
+        isDead = false;
 	}
 
 	void Update () {
@@ -49,10 +66,20 @@ public class PicoController : MonoBehaviour {
             isWalking = false;
         }
 
+        if (Input.GetKeyDown("left"))
+        {
+            playerSprite.flipX = true;
+        }
+        if (Input.GetKeyDown("right"))
+        {
+            playerSprite.flipX = false;
+        }
+        
         if (Input.GetKeyDown("up") && isGrounded)
         {
             isGrounded = false;
             playerRb.AddForce(new Vector2(0,jumpPower));
+            SoundEffectsSource.PlayOneShot(jumpSound);
         }
 
         if (isGrounded && !isWalking)
@@ -70,17 +97,29 @@ public class PicoController : MonoBehaviour {
 
         if(Input.GetKeyDown("space") && fullSize)
         {
+            SoundEffectsSource.PlayOneShot(miniturizeSound);
             StartCoroutine(Shrink());
         }
 
         if(Input.GetKeyDown("space") && !fullSize)
         {
+            SoundEffectsSource.PlayOneShot(enlargeSound);
             StartCoroutine(Enlarge());
         }
 
-        if (numberOfLives == 0 && !enemyDeathDelay)
+        if (gameObject.transform.position.x < mainCamera.transform.position.x - 10 
+        || gameObject.transform.position.x > mainCamera.transform.position.x + 10
+        || gameObject.transform.position.y < mainCamera.transform.position.y - 7
+        || gameObject.transform.position.y > mainCamera.transform.position.y + 10)
         {
-            //Play Death mp3
+            numberOfLives = 0;
+        }
+
+        if (numberOfLives == 0 && !isDead)
+        {
+            SoundEffectsSource.PlayOneShot(deathSound);
+            mainCamera.GetComponent<CameraController>().notDead = false;
+            Destroy(MusicSource);
             StartCoroutine(Death());
         }
 	}
@@ -93,24 +132,34 @@ public class PicoController : MonoBehaviour {
         {
             candyCollected += 1;
             Destroy(collision.collider.gameObject);
+            SoundEffectsSource.PlayOneShot(collectCoinSound);
         }
 
         if (collision.collider.tag == "Giftbox")
         {
             candyCollected += 10;
             Destroy(collision.collider.gameObject);
+            SoundEffectsSource.PlayOneShot(collectGiftboxSound);
         }
 
         if (collision.collider.tag == "Chest")
         {
             numberOfLives += 1;
             Destroy(collision.collider.gameObject);
+            SoundEffectsSource.PlayOneShot(collectTreasureSound);
         }
 
-        if (collision.collider.tag == "Enemy")
+        if (collision.collider.tag == "Enemy" && !onTopOfEnemy)
         {
             numberOfLives -= 1;
+            SoundEffectsSource.PlayOneShot(damageSound);
         }
+        else if (collision.collider.tag == "Enemy" && onTopOfEnemy)
+        {
+            candyCollected += 10;
+            SoundEffectsSource.PlayOneShot(killEnemySound);
+        }
+        
     }
 
     IEnumerator Shrink()
@@ -132,7 +181,9 @@ public class PicoController : MonoBehaviour {
 
     IEnumerator Death()
     {
-        yield return new WaitForSeconds(3);
-        Destroy(gameObject);
+        SoundEffectsSource.PlayOneShot(deathSound);
+        yield return new WaitForSeconds(1);
+        isDead = true;
+        gameObject.SetActive(false);
     }
 }

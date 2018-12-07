@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GreenSquidController : MonoBehaviour {
 
+    public Rigidbody2D squidRb;
     public Vector3 rayVector;
     public float rayDistance;
     public RaycastHit2D squashHit;
@@ -12,7 +13,7 @@ public class GreenSquidController : MonoBehaviour {
     public GameObject player;
 
     void Start () {
-        
+        StartCoroutine(Movement());
     }
 
 	void Update () {
@@ -24,7 +25,7 @@ public class GreenSquidController : MonoBehaviour {
 
         if (squashHit.collider != null)
         {
-            player.GetComponent<PicoController>().enemyDeathDelay = true;
+            player.GetComponent<PicoController>().onTopOfEnemy = true;
             Debug.Log("I've been hit!");
             StartCoroutine(Death());
         }
@@ -33,9 +34,27 @@ public class GreenSquidController : MonoBehaviour {
 
     IEnumerator Death()
     {
-        player.GetComponent<PicoController>().enemyDeathDelay = true;
+        player.GetComponent<PicoController>().onTopOfEnemy = true;
         yield return new WaitForSecondsRealtime(deathDelay);
-        player.GetComponent<PicoController>().enemyDeathDelay = false;
+        player.GetComponent<PicoController>().onTopOfEnemy = false;
         Destroy(gameObject);
+    }
+    IEnumerator Movement()
+    {
+        while (isActiveAndEnabled)
+        {
+            for (int i = 0; i < 75; i++)
+            {
+                gameObject.transform.Translate(-0.025f, 0, 0);
+                yield return new WaitForEndOfFrame();
+            }
+            yield return new WaitForSecondsRealtime(1);
+            for (int i = 0; i < 75; i++)
+            {
+                gameObject.transform.Translate(0.025f, 0, 0);
+                yield return new WaitForEndOfFrame();
+            }
+            yield return new WaitForSecondsRealtime(1);
+        }
     }
 }
