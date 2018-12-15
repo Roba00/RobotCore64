@@ -5,18 +5,20 @@ using UnityEngine;
 public class CameraController : MonoBehaviour {
 
     public bool autoScroll;
-    public bool notDead = true;
+    public bool isFrozen = false;
+    public float cameraSpeed;
+    
 
 	void Start () {
 		
 	}
 	
 	void Update () {
-        if (notDead)
+        if (!isFrozen)
         {
 		    if (autoScroll)
             {
-                gameObject.transform.Translate(Vector3.right * 0.01f);
+                gameObject.transform.Translate(Vector3.right * cameraSpeed);
             }
             else
             {

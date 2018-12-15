@@ -118,7 +118,7 @@ public class PicoController : MonoBehaviour {
         if (numberOfLives == 0 && !isDead)
         {
             SoundEffectsSource.PlayOneShot(deathSound);
-            mainCamera.GetComponent<CameraController>().notDead = false;
+            mainCamera.GetComponent<CameraController>().isFrozen = true;
             Destroy(MusicSource);
             StartCoroutine(Death());
         }

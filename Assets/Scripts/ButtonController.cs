@@ -9,6 +9,8 @@ public class ButtonController : MonoBehaviour {
 	public Sprite redButton;
 	public GameObject levelOneInteractableGround;
 	public bool hasBeenPressed;
+	public AudioSource SoundEffectsSource;
+	public AudioClip buttonPressSound;
 	
 	void Start () {
 		spriteRenderer.sprite = redButton;
@@ -19,6 +21,7 @@ public class ButtonController : MonoBehaviour {
 		if (spriteRenderer.sprite == greenButton && !hasBeenPressed)
 		{
 			hasBeenPressed = true;
+			SoundEffectsSource.PlayOneShot(buttonPressSound);
 			StartCoroutine(moveLevelOneInteractableGround());
 		}
 	}
