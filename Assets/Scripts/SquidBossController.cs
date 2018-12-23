@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class SquidBossController : MonoBehaviour {
 
@@ -29,6 +30,14 @@ public class SquidBossController : MonoBehaviour {
     public GameObject player;
     int attackNumber;
 
+    public GameObject greenSquidClone;
+    public GameObject sludge;
+    bool hasAttacked;
+    public bool isDead = false;
+    public AudioSource musicSource;
+    public AudioSource soundEffectsSource;
+    public AudioClip winSound;
+
 
     void Start () {
         miniBossTitle.SetActive(false);
@@ -36,6 +45,7 @@ public class SquidBossController : MonoBehaviour {
         DialougeBackground.SetActive(false);
         DialougeTextObject.SetActive(false);
         hasStartedTalking = false;
+        hasAttacked = false;
 
         Physics2D.IgnoreLayerCollision(8, 9, true);
         Physics2D.IgnoreLayerCollision(9, 8, true);
@@ -69,22 +79,27 @@ public class SquidBossController : MonoBehaviour {
             StartCoroutine(StartTalking());
         }
 
-         if (squashHit.collider != null && player.GetComponent<PicoController>().onTopOfEnemy == false)
+        if (squashHit.collider == player.GetComponent<Collider2D>() && player.GetComponent<PicoController>().onTopOfEnemy == false)
         {
             player.GetComponent<PicoController>().onTopOfEnemy = true;
+            player.GetComponent<Rigidbody2D>().AddForce(Vector3.left * 250);
             Debug.Log("I've been hit!");
             StartCoroutine(SubtractLife());
         }
 
-        if (numberOfLives <= 50)
+        if (numberOfLives <= 50 && !hasAttacked)
         {
             StopCoroutine(BossRun());
             StartCoroutine(BossAttack());
+            hasAttacked = true;
         }
 
-        if (numberOfLives <= 0)
+        if (numberOfLives <= 0 && !isDead)
         {
-            Destroy(gameObject);
+            Destroy(musicSource);
+            soundEffectsSource.PlayOneShot(winSound);
+            StartCoroutine(NextLevel());
+            isDead = true;
         }
     }
 
@@ -98,6 +113,29 @@ public class SquidBossController : MonoBehaviour {
         {
             Physics2D.IgnoreCollision(collision.collider, bossCollider);
         }
+    }
+
+    IEnumerator NextLevel()
+    {
+        spriteRenderer.enabled = false;
+        gameObject.GetComponent<PolygonCollider2D>().enabled = false;
+        player.GetComponent<PicoController>().speed = 0;
+        player.GetComponent<PicoController>().fullSize = true;
+        StartCoroutine(player.GetComponent<PicoController>().Enlarge());
+        player.GetComponent<SpriteRenderer>().flipX = false;
+        player.GetComponent<PicoController>().allowedToMove = false;
+        player.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation;
+        player.GetComponent<PicoController>().playerSprite.sprite = player.GetComponent<PicoController>().playerCheerUp;
+        yield return new WaitForSecondsRealtime(1);
+        player.GetComponent<PicoController>().playerSprite.sprite = player.GetComponent<PicoController>().playerCheerDown;
+        yield return new WaitForSecondsRealtime(1);
+        player.GetComponent<PicoController>().playerSprite.sprite = player.GetComponent<PicoController>().playerCheerUp;
+        yield return new WaitForSecondsRealtime(1);
+        player.GetComponent<PicoController>().playerSprite.sprite = player.GetComponent<PicoController>().playerCheerDown;
+        yield return new WaitForSecondsRealtime(1);
+        player.GetComponent<PicoController>().playerSprite.sprite = player.GetComponent<PicoController>().playerCheerUp;
+        yield return new WaitForSecondsRealtime(1);
+        SceneManager.LoadScene(2);
     }
 
     IEnumerator SubtractLife()
@@ -155,37 +193,54 @@ public class SquidBossController : MonoBehaviour {
     IEnumerator BossRun()
     {
         miniBossTitle.SetActive(true);
-        miniBossHealthTextObject.SetActive(true);
-        
+        miniBossHealthTextObject.SetActive(true);   
         MainCamera.GetComponent<CameraController>().isFrozen = false;
         spriteRenderer.flipX = true;
-        for (int i = 0; i < 2000; i++)
+        while (!hasAttacked)
         {
-            gameObject.transform.Translate(MainCamera.GetComponent<CameraController>().cameraSpeed, 0, 0);
-            yield return new WaitForEndOfFrame();
-        }
+            //for (int i = 0; i < 2000; i++)
+            //{
+                gameObject.transform.Translate(MainCamera.GetComponent<CameraController>().cameraSpeed, 0, 0);
+                yield return new WaitForEndOfFrame();
+            //}
+        }       
+        /* else
+        {
+            gameObject.transform.Translate(new Vector3(0,0,0));
+        }*/
     }
 
     IEnumerator BossAttack()
-    {
+    {  
+        StopCoroutine(StartTalking());
+        StopCoroutine(BossRun());
+        gameObject.transform.position = new Vector3(125.62f, -1.11f, 0);
+        spriteRenderer.flipX = false;
+        player.transform.position = new Vector3(115.04f, -2.28f, 0);
+        MainCamera.transform.position = new Vector3(119.15f, 1, -10f);
+        MainCamera.GetComponent<CameraController>().isFrozen = true;
+
+        gameObject.transform.Translate(new Vector3(0, 0, 0));
+
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        DialougeText.text = "";
         DialougeBackground.SetActive(true);
         DialougeTextObject.SetActive(true);
-        DialougeText.text = "";
         string dialouge =  "Squid Boss: I have you now!!!";
+
         foreach (char letter in dialouge.ToCharArray())
         {
             DialougeText.text += letter;
             yield return new WaitForSecondsRealtime(0.01f);
-        }   
+        } 
+
         yield return new WaitForSecondsRealtime(3);
+
         DialougeText.text = "";
+
         DialougeBackground.SetActive(false);
         DialougeTextObject.SetActive(false);
-
-
-        gameObject.transform.position = new Vector3(125.62f, -1.11f, 0);
-        player.transform.position = new Vector3(111.04f, -2.28f, 0);
-        MainCamera.transform.position = new Vector3(119.15f, 1, 0);
 
         for (int i = 0; i < 100; i++)
         {
@@ -193,20 +248,61 @@ public class SquidBossController : MonoBehaviour {
             
             if (attackNumber == 1) //Slam Attack
             {
-
+                for (int l = 0; l < 50; l++)
+                {
+                    gameObject.transform.Translate(0, 0.1f, 0);
+                    yield return new WaitForSecondsRealtime(0.01f);
+                }
+                int moveDistance = Random.Range (30, 125);
+                for (int l = 0; l < moveDistance; l++)
+                {
+                    gameObject.transform.Translate(-0.1f, 0, 0);
+                    yield return new WaitForSecondsRealtime(0.01f);
+                }
+                for (int l = 0; l < 70; l++)
+                {
+                    gameObject.transform.Translate(0, -0.1f, 0);
+                    yield return new WaitForSecondsRealtime(0.01f);
+                }
+                for (int l = 0; l < moveDistance; l++)
+                {
+                    gameObject.transform.Translate(0.1f, 0, 0);
+                    yield return new WaitForSecondsRealtime(0.01f);
+                }
+                for (int l = 0; l < 20; l++)
+                {
+                    gameObject.transform.Translate(0, 0.1f, 0);
+                    yield return new WaitForSecondsRealtime(0.01f);
+                }
             }
 
-            else if (attackNumber == 2) //Spray Ink
+            if (attackNumber == 2) //Spray Ink
             {
-
+                GameObject sludge1 = Instantiate(sludge, new Vector3(Random.Range(110.8246f, 115.69f), 2.5f, 0f), Quaternion.identity);
+                yield return new WaitForSecondsRealtime(0.5f);
+                GameObject sludge2 = Instantiate(sludge, new Vector3(Random.Range(117.78f, 121.34f), 2.5f, 0f), Quaternion.identity);
+                yield return new WaitForSecondsRealtime(0.5f);
+                GameObject sludge3 = Instantiate(sludge, new Vector3(Random.Range(123.92f, 127.6f), 2.5f, 0f), Quaternion.identity);
+                yield return new WaitForSecondsRealtime(3);
+                Destroy(sludge1);
+                Destroy(sludge2);
+                Destroy(sludge3);
             }
 
             else if (attackNumber == 3) //Spawn Minions
             {
-
+                GameObject minion1 = Instantiate(greenSquidClone, new Vector3(112.5f, 2.5f, 0f), Quaternion.identity);
+                minion1.GetComponent<GreenSquidController>().player = GameObject.Find("/Pico");
+                yield return new WaitForSecondsRealtime(0.5f);
+                GameObject minion2 = Instantiate(greenSquidClone, new Vector3(119, 2.5f, 0f), Quaternion.identity);
+                minion2.GetComponent<GreenSquidController>().player = GameObject.Find("/Pico");
+                yield return new WaitForSecondsRealtime(0.5f);
+                GameObject minion3 = Instantiate(greenSquidClone, new Vector3(125, 2.5f, 0f), Quaternion.identity);
+                minion3.GetComponent<GreenSquidController>().player = GameObject.Find("/Pico");
+                yield return new WaitForSecondsRealtime(3);
             }
 
-            yield return new WaitForEndOfFrame();
+            yield return new WaitForSecondsRealtime(1);
         }
     }
 }

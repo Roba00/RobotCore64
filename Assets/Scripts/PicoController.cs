@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PicoController : MonoBehaviour {
 
@@ -11,6 +12,8 @@ public class PicoController : MonoBehaviour {
     public Sprite playerIdle;
     public Sprite playerWalking;
     public Sprite playerJumping;
+    public Sprite playerCheerUp;
+    public Sprite playerCheerDown;
     public Vector2 movementVect;
 
     float horizontalValue;
@@ -19,6 +22,7 @@ public class PicoController : MonoBehaviour {
     public int jumpPower;
     public bool isGrounded;
     public bool isWalking;
+    public bool allowedToMove = true;
 
     public Text candyText;
     public int candyCollected;
@@ -66,42 +70,52 @@ public class PicoController : MonoBehaviour {
             isWalking = false;
         }
 
-        if (Input.GetKeyDown("left"))
+        if (Input.GetKeyDown("left") && allowedToMove)
         {
             playerSprite.flipX = true;
         }
-        if (Input.GetKeyDown("right"))
+        if (Input.GetKeyDown("right") && allowedToMove)
         {
             playerSprite.flipX = false;
         }
         
-        if (Input.GetKeyDown("up") && isGrounded)
+        if (Input.GetKeyDown("up") && isGrounded && allowedToMove)
         {
             isGrounded = false;
             playerRb.AddForce(new Vector2(0,jumpPower));
             SoundEffectsSource.PlayOneShot(jumpSound);
         }
 
-        if (isGrounded && !isWalking)
+        //R.I.P Running Speed
+        /*if (Input.GetKey(KeyCode.LeftShift))
+        {
+            speed = 8;
+        }
+        else 
+        {
+            speed = 5;
+        }*/
+
+        if (isGrounded && !isWalking && allowedToMove)
         {
             playerSprite.sprite = playerIdle;
         }
-        else if (isGrounded && isWalking)
+        else if (isGrounded && isWalking && allowedToMove)
         {
             playerSprite.sprite = playerWalking;
         }
-        else
+        else if (allowedToMove)
         {
             playerSprite.sprite = playerJumping;
         }
 
-        if(Input.GetKeyDown("space") && fullSize)
+        if(Input.GetKeyDown("space") && fullSize && allowedToMove)
         {
             SoundEffectsSource.PlayOneShot(miniturizeSound);
             StartCoroutine(Shrink());
         }
 
-        if(Input.GetKeyDown("space") && !fullSize)
+        if(Input.GetKeyDown("space") && !fullSize && allowedToMove)
         {
             SoundEffectsSource.PlayOneShot(enlargeSound);
             StartCoroutine(Enlarge());
@@ -117,10 +131,12 @@ public class PicoController : MonoBehaviour {
 
         if (numberOfLives == 0 && !isDead)
         {
+            isDead = true;
             SoundEffectsSource.PlayOneShot(deathSound);
             mainCamera.GetComponent<CameraController>().isFrozen = true;
             Destroy(MusicSource);
-            StartCoroutine(Death());
+            gameObject.SetActive(false);
+            //StartCoroutine(Death());
         }
 	}
 
@@ -170,7 +186,7 @@ public class PicoController : MonoBehaviour {
         fullSize = false;
     }
 
-    IEnumerator Enlarge()
+    public IEnumerator Enlarge()
     {
         Debug.Log("Enlarging");
         transform.Translate(0, 1, 0);
@@ -181,9 +197,9 @@ public class PicoController : MonoBehaviour {
 
     IEnumerator Death()
     {
-        SoundEffectsSource.PlayOneShot(deathSound);
-        yield return new WaitForSeconds(1);
-        isDead = true;
+        //SoundEffectsSource.PlayOneShot(deathSound);
+        yield return new WaitForSecondsRealtime(5);
+        //isDead = true;
         gameObject.SetActive(false);
     }
 }

@@ -6,8 +6,9 @@ using UnityEngine.SceneManagement;
 
 public class StartScreenController : MonoBehaviour {
 
-	public Button startButton;
 	public Camera mainCamera;
+	public Button playButton;
+	public Button stopButton;
 	//int red = 0;
 	//int green = 0;
 	//int blue = 0;
@@ -16,7 +17,7 @@ public class StartScreenController : MonoBehaviour {
 	bool blooping = true;
 
 	void Start () {
-		startButton.onClick.AddListener(OnClick);
+		playButton.onClick.AddListener(OnClick);
 		StartCoroutine(bgColorShifter());
 	}
 	
