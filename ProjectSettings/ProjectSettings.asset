@@ -711,7 +711,7 @@ PlayerSettings:
   m_MobileRenderingPath: 1
   metroPackageName: RobotCore64
   metroPackageVersion: 
-  metroCertificatePath: C:\Users\abbaj\Documents\UnityProjects\RobotCore64\Assets\WSATestCertificate.pfx
+  metroCertificatePath: Assets\WSATestCertificate.pfx
   metroCertificatePassword: 
   metroCertificateSubject: RobaAbbajabal
   metroCertificateIssuer: RobaAbbajabal

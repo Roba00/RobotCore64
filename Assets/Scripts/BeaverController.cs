@@ -22,7 +22,7 @@ public class BeaverController : MonoBehaviour {
 
         squashHit = Physics2D.Raycast(rayVector, Vector2.left, rayDistance);
 
-        if (squashHit.collider != null)
+        if (squashHit.collider == player.GetComponent<PolygonCollider2D>())
         {
             player.GetComponent<PicoController>().onTopOfEnemy = true;
             Debug.Log("I've been hit!");

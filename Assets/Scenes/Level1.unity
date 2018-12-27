@@ -12095,7 +12095,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2098805430}
   - component: {fileID: 2098805429}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: DontMax
   m_TagString: DontMax
   m_Icon: {fileID: 0}
