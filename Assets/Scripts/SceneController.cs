@@ -21,9 +21,6 @@ public class SceneController : MonoBehaviour {
 	Color bgColor;
 	bool blooping = true;
 
-	
-	
-
 	void Start () 
 	{
 		switch (SceneManager.GetActiveScene().name)
@@ -144,7 +141,7 @@ public class SceneController : MonoBehaviour {
 		hasPlayedIntro = true;
 		introText.text = "";
         
-        string dialouge = "June 11, 2390 \n After a progressive 1000 months, a team of engineers funded by the United Nations was able to create a superior life-form to surpass the race of Homo-Sapiens. However, the life-form, named Pico, has escaped the laboratory in which it was created, and set loose on it's purpose to end all life-forms on Earth, starting with innocent creatures that have been exposed to a chemical radiation leak caused by humans.";
+        string dialouge = "June 11, 2390 \n After a progressive 1000 months, a team of engineers funded by the United Nations was able to create a superior life-form to surpass the race of Homo-Sapiens. However, the life-form, named Pico, has escaped the laboratory in which it was created, and set loose on its purpose to end all life-forms on Earth, starting with innocent creatures that have been exposed to a chemical radiation leak caused by humans.";
         foreach (char letter in dialouge.ToCharArray())
         {
         	introText.text += letter;
