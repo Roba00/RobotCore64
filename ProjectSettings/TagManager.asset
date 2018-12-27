@@ -9,6 +9,7 @@ TagManager:
   - Giftbox
   - Chest
   - Enemy
+  - DontMax
   layers:
   - Default
   - TransparentFX

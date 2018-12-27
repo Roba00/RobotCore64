@@ -31,6 +31,8 @@ public class PicoController : MonoBehaviour {
     public bool fullSize = true;
     public bool onTopOfEnemy = false;
     public bool isDead;
+    bool jumpCoolDown = false;
+    public bool canMax;
 
     public AudioSource MusicSource;
     public AudioSource SoundEffectsSource;
@@ -109,15 +111,13 @@ public class PicoController : MonoBehaviour {
             playerSprite.sprite = playerJumping;
         }
 
-        if(Input.GetKeyDown("space") && fullSize && allowedToMove)
+        if(Input.GetKeyDown("space") && fullSize && allowedToMove && !jumpCoolDown)
         {
-            SoundEffectsSource.PlayOneShot(miniturizeSound);
             StartCoroutine(Shrink());
         }
 
-        if(Input.GetKeyDown("space") && !fullSize && allowedToMove)
+        if(Input.GetKeyDown("space") && !fullSize && allowedToMove && !jumpCoolDown && canMax)
         {
-            SoundEffectsSource.PlayOneShot(enlargeSound);
             StartCoroutine(Enlarge());
         }
 
@@ -129,7 +129,12 @@ public class PicoController : MonoBehaviour {
             numberOfLives = 0;
         }
 
-        if (numberOfLives == 0 && !isDead)
+        if (numberOfLives < 0)
+        {
+            numberOfLives = 0;
+        }
+
+        if (numberOfLives <= 0 && !isDead)
         {
             isDead = true;
             SoundEffectsSource.PlayOneShot(deathSound);
@@ -175,24 +180,44 @@ public class PicoController : MonoBehaviour {
             candyCollected += 10;
             SoundEffectsSource.PlayOneShot(killEnemySound);
         }
-        
+    }
+
+    private void OnTriggerEnter2D (Collider2D other)
+    {
+        if (other.tag == "DontMax")
+        {
+            canMax = false;
+        }
+    }
+    private void OnTriggerExit2D (Collider2D other)
+    {
+        if (other.tag == "DontMax")
+        {
+            canMax = true;
+        }
     }
 
     IEnumerator Shrink()
     {
+        jumpCoolDown = true;
         Debug.Log("Shrinking");
+        SoundEffectsSource.PlayOneShot(miniturizeSound);
         transform.localScale = new Vector3(1.5f, 1.375f, 1);
-        yield return new WaitForSecondsRealtime(0.0125f);
+        yield return new WaitForSecondsRealtime(0.0125f); //Old 0.0125f
         fullSize = false;
+        jumpCoolDown = false;
     }
 
     public IEnumerator Enlarge()
     {
+        jumpCoolDown = true;
         Debug.Log("Enlarging");
+        SoundEffectsSource.PlayOneShot(enlargeSound);
         transform.Translate(0, 1, 0);
         transform.localScale = new Vector3(3, 2.75f, 1);
-        yield return new WaitForSecondsRealtime(0.0125f);
+        yield return new WaitForSecondsRealtime(0.0125f); //Old 0.0125f
         fullSize = true;
+        jumpCoolDown = false;
     }
 
     IEnumerator Death()

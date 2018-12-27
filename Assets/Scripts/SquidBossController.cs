@@ -9,9 +9,6 @@ public class SquidBossController : MonoBehaviour {
     Vector3 squashHitRayVector;
     public float squashHitRayDistance;
     RaycastHit2D squashHit;
-    Vector3 sensePlayerRayVector;
-    public float sensePlayerRayDistance;
-    RaycastHit2D sensePlayer;
     public int numberOfLives = 100;
     public float subtractDelay;
     public GameObject DialougeBackground;
@@ -29,6 +26,7 @@ public class SquidBossController : MonoBehaviour {
     public Text miniBossHealthText;
     public GameObject player;
     int attackNumber;
+    public GameObject barrier;
 
     public GameObject greenSquidClone;
     public GameObject sludge;
@@ -58,18 +56,11 @@ public class SquidBossController : MonoBehaviour {
         squashHitRayVector.y = transform.position.y + 2.4f;
         squashHitRayVector.z = transform.position.z;
 
-        sensePlayerRayVector.x = transform.position.x - 1f;
-        sensePlayerRayVector.y = transform.position.y - 2.4f;
-        sensePlayerRayVector.z = transform.position.z;
-
-
         squashHit = Physics2D.Raycast(squashHitRayVector, Vector2.left, squashHitRayDistance);
-        sensePlayer = Physics2D.Raycast(sensePlayerRayVector, Vector2.left, sensePlayerRayDistance);
 
         Debug.DrawRay(squashHitRayVector, Vector2.left * squashHitRayDistance, Color.green);
-        Debug.DrawRay(sensePlayerRayVector, Vector2.left * sensePlayerRayDistance, Color.red);
 
-        if (sensePlayer.collider != null && !hasStartedTalking && MainCamera.transform.position.x >= 41)
+        if (!hasStartedTalking && MainCamera.transform.position.x >= 41)
         {
             hasStartedTalking = true;
             MainCamera.GetComponent<CameraController>().isFrozen = true;
@@ -92,6 +83,11 @@ public class SquidBossController : MonoBehaviour {
             StopCoroutine(BossRun());
             StartCoroutine(BossAttack());
             hasAttacked = true;
+        }
+
+        if (numberOfLives < 0)
+        {
+            numberOfLives = 0;
         }
 
         if (numberOfLives <= 0 && !isDead)
@@ -187,6 +183,7 @@ public class SquidBossController : MonoBehaviour {
         
         //Play epic boss music.
 
+        Destroy(barrier);
         StartCoroutine(BossRun());
     }
 
