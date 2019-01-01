@@ -23,6 +23,8 @@ public class PicoController : MonoBehaviour {
     public bool isGrounded;
     public bool isWalking;
     public bool allowedToMove = true;
+    bool touchingWall;
+    float climb = 0;
 
     public Text candyText;
     public int candyCollected;
@@ -62,7 +64,7 @@ public class PicoController : MonoBehaviour {
         livesText.text = numberOfLives.ToString();
 
         horizontalValue = Input.GetAxis("Horizontal") * Time.deltaTime * speed;
-        playerTf.Translate(horizontalValue, 0, 0);
+        playerTf.Translate(horizontalValue, climb, 0);
         if (horizontalValue != 0)
         {
             isWalking = true;
@@ -86,6 +88,17 @@ public class PicoController : MonoBehaviour {
             isGrounded = false;
             playerRb.AddForce(new Vector2(0,jumpPower));
             SoundEffectsSource.PlayOneShot(jumpSound);
+        }
+
+        if (Input.GetKey("z") && touchingWall && allowedToMove)
+        {
+            isGrounded = false;
+            climb = 0.25f;
+            SoundEffectsSource.PlayOneShot(jumpSound);
+        }
+        else
+        {
+            climb = 0;
         }
 
         //R.I.P Running Speed
@@ -149,6 +162,11 @@ public class PicoController : MonoBehaviour {
     {
         isGrounded = true;
 
+        if (collision.collider.tag == "Wall")
+        {
+            touchingWall = true;
+        }
+
         if (collision.collider.tag == "Candy")
         {
             candyCollected += 1;
@@ -180,6 +198,11 @@ public class PicoController : MonoBehaviour {
             candyCollected += 10;
             SoundEffectsSource.PlayOneShot(killEnemySound);
         }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        touchingWall = false;
     }
 
     private void OnTriggerEnter2D (Collider2D other)

@@ -13,7 +13,6 @@ public class SceneController : MonoBehaviour {
 	public Button quitButton;
 	public Button continueButton;
 	public Text introText;
-	public RawImage[] transparentBackgrounds;
 
 	bool hasPlayedIntro = false;
 	public AudioSource introTypingSound;
@@ -48,6 +47,9 @@ public class SceneController : MonoBehaviour {
 				break;
 
 			case "Level1":
+				break;
+
+			case "Level2":
 				break;
 		}
 
@@ -111,6 +113,9 @@ public class SceneController : MonoBehaviour {
 				{
 					StartCoroutine(LoadScene3());
 				}
+				break;
+				
+			case "Level2":
 				break;
 		}
 	}

@@ -7,6 +7,9 @@ public class CameraController : MonoBehaviour {
     public bool autoScroll;
     public bool isFrozen = false;
     public float cameraSpeed;
+    public GameObject player;
+    Vector3 playerVector;
+    Quaternion quat;
     
 
 	void Start () {
@@ -14,15 +17,17 @@ public class CameraController : MonoBehaviour {
 	}
 	
 	void Update () {
+        playerVector = new Vector3(player.transform.position.x, player.transform.position.y, -10f);
+        
         if (!isFrozen)
         {
 		    if (autoScroll)
             {
                 gameObject.transform.Translate(Vector3.right * cameraSpeed);
             }
-            else
+            if (!autoScroll)
             {
-
+                gameObject.transform.SetPositionAndRotation(playerVector, quat);
             }
         }
 	}
